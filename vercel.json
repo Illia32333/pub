@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "api/*.js", "use": "@vercel/node" },
+    { "src": "web/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/storage", "dest": "api/storage.js" },
+    { "src": "/api/webhook", "dest": "api/webhook.js" },
+    { "src": "/(.*)", "dest": "web/$1" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "ALLOW-FROM https://web.telegram.org" },
+        { "key": "Content-Security-Policy", "value": "frame-ancestors 'self' https://web.telegram.org https://k.tlgrm.eu" }
+      ]
+    }
+  ]
+}

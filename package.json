@@ -1,0 +1,12 @@
+{
+  "name": "spanish-a2-pg",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Испанский A2 — Telegram Mini App с PostgreSQL",
+  "dependencies": {
+    "pg": "^8.12.0"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}

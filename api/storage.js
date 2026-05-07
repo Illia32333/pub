@@ -50,25 +50,22 @@ async function ensureTable(client) {
       PRIMARY KEY (user_id, key)
     )
   `);
-  // Индекс для быстрой выборки всех ключей пользователя
   await client.query(`
     CREATE INDEX IF NOT EXISTS idx_user_storage_user_id ON user_storage (user_id)
   `);
   tableReady = true;
 }
 
-// ── CORS headers ──────────────────────────────────────────────────────────────
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
-
 // ── Main handler ──────────────────────────────────────────────────────────────
 export default async function handler(req, res) {
+  // CORS — выставляем один раз для всех ответов
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
   // Preflight
   if (req.method === 'OPTIONS') {
-    return res.status(200).set(CORS).end();
+    return res.status(200).end();
   }
 
   if (req.method !== 'POST') {
@@ -95,7 +92,7 @@ export default async function handler(req, res) {
         'SELECT value FROM user_storage WHERE user_id = $1 AND key = $2',
         [userId, key]
       );
-      return res.status(200).set(CORS).json({
+      return res.status(200).json({
         value: rows[0]?.value ?? null,
       });
     }
@@ -111,7 +108,7 @@ export default async function handler(req, res) {
         DO UPDATE SET value = EXCLUDED.value, updated_at = now()
       `, [userId, key, value ?? null]);
 
-      return res.status(200).set(CORS).json({ ok: true });
+      return res.status(200).json({ ok: true });
     }
 
     // ── REMOVE ───────────────────────────────────────────────────────────────
@@ -122,7 +119,7 @@ export default async function handler(req, res) {
         'DELETE FROM user_storage WHERE user_id = $1 AND key = $2',
         [userId, key]
       );
-      return res.status(200).set(CORS).json({ ok: true });
+      return res.status(200).json({ ok: true });
     }
 
     // ── GET ALL ──────────────────────────────────────────────────────────────
@@ -132,7 +129,7 @@ export default async function handler(req, res) {
         [userId]
       );
       const data = Object.fromEntries(rows.map(r => [r.key, r.value]));
-      return res.status(200).set(CORS).json({ data });
+      return res.status(200).json({ data });
     }
 
     return res.status(400).json({ error: `Unknown method: ${method}` });
